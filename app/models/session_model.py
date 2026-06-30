@@ -21,7 +21,7 @@ class Session(db.Model):
             "date": self.date,
             "start_time": self.start_time,
             "end_time": self.end_time,
-            "capacity": self.capacity
+            "capacity": self.capacity,
         }
 
 

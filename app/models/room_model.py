@@ -10,5 +10,5 @@ class Room(db.Model):
     def to_dict(self):
         return {
             "room_id": self.room_id,
-            "name": self.name,
+            "name": self.room_name,
         }
