@@ -4,7 +4,7 @@ class Room(db.Model):
     __tablename__ = "rooms"
 
     room_id=db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name=db.Column(db.String(120), nullable=False)
+    room_name=db.Column(db.String(120), nullable=False)
      
 
     def to_dict(self):
