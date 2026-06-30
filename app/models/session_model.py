@@ -4,9 +4,9 @@ from app.utils import utc_now
 class Session(db.Model):
     __tablename__="sessions"
     session_id = db.Column( db.Integer, primary_key=True, autoincrement=True )
-    room_id = db.Column(db.Integer, db.ForeignKey('room.id'))
-    title = db.Column( db.String, nullable=False )
-    speaker = db.Column( db.String, nullable=False )
+    room_id = db.Column(db.Integer, db.ForeignKey('rooms.room_id'))
+    title = db.Column( db.String(255), nullable=False )
+    speaker = db.Column( db.String(255), nullable=False )
     date = db.Column( db.Date, nullable=False )
     start_time = db.Column( db.Time, nullable=False )
     end_time = db.Column( db.Time, nullable=False )
