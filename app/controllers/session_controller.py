@@ -57,3 +57,16 @@ def update_session(session_id):
         db.session.rollback()
         return jsonify({"error": e})
     
+def delete_session(session_id):
+    session=Session.query.get(session_id)
+    if not session:
+        return jsonify({"error":"session not found"}),404
+    
+    try:
+        db.session.delete(session)
+        db.session.commit()
+        return jsonify({"session deleted successfully"})
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": e})
