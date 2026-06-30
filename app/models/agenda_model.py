@@ -1,7 +1,7 @@
 from app.extensions import db
 
-class Room(db.Model):
-    __tablename__ = "rooms"
+class Agenda(db.Model):
+    __tablename__ = "agendas"
 
     agenda_id=db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
