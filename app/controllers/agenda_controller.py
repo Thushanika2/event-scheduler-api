@@ -20,7 +20,7 @@ def create_agenda():
     
 def get_agendas():
     agendas = Agenda.query.all()
-    return jsonify ({"error":[s.to_dict() for s in agendas]}), 200
+    return jsonify ({"error":[a.to_dict() for a in agendas]}), 200
 
 def get_agenda(agenda_id):
     agenda = Agenda.query.get(agenda_id)
