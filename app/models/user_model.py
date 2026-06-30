@@ -19,7 +19,7 @@ class User(db.Model):
 
     def to_dict(self):
         return {
-            "id": self.id,
+            "user_id": self.user_id,
             "email": self.email,
             "role": self.role,
             "created_at": self.created_at.isoformat() if self.created_at else None,
