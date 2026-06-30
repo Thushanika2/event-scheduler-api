@@ -1,6 +1,7 @@
 import re
 from flask import jsonify, request
 from flask_jwt_extended import create_access_token
+
 from app.extensions import db
 from app.models.user_model import User
 
@@ -58,7 +59,8 @@ def register():
     try:
         user = User(
             email=str(data.get("email")).strip(),
-            role=data.get("role", "attendee")
+            # role="student"  # Force default role and ignore any payload input
+            role=data.get("role", "student")  # Use provided role or default to "student"
         )
         user.set_password(str(data.get("password")))
 
