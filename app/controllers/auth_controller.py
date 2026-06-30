@@ -59,7 +59,7 @@ def register():
     try:
         user = User(
             email=str(data.get("email")).strip(),
-            role=data.get("role", "user") 
+            role=data.get("role", "user", "admin") 
         )
         user.set_password(str(data.get("password")))
 
