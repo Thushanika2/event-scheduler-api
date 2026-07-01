@@ -28,6 +28,11 @@ def _validate_register_payload(data):
     elif len(str(password)) < 6:
         errors.append("password must be at least 6 characters long.")
 
+    role = data.get("role", "user")
+    if role is not None and str(role).strip() != "":
+        if str(role).strip().lower() not in ("user", "admin"):
+            errors.append("role must be 'user' or 'admin'.")
+
     return errors
 
 
@@ -57,19 +62,20 @@ def register():
         return jsonify({"errors": errors}), 400
 
     try:
+        role = str(data.get("role", "user")).strip().lower() or "user"
         user = User(
             email=str(data.get("email")).strip(),
-            role=data.get("role", "user", "admin") 
+            role=role,
         )
         user.set_password(str(data.get("password")))
 
-        
+
         db.session.add(user)
         db.session.commit()
         return jsonify({"message": "User registered successfully.", "user": user.to_dict()}), 201
-    except Exception as e:
+    except Exception:
         db.session.rollback()
-        return jsonify(e), 500
+        return jsonify({"error": "An internal server error occurred."}), 500
 
 
 def login():
