@@ -67,9 +67,9 @@ def register():
         db.session.add(user)
         db.session.commit()
         return jsonify({"message": "User registered successfully.", "user": user.to_dict()}), 201
-    except Exception:
+    except Exception as e:
         db.session.rollback()
-        return jsonify({"error": "An internal server error occurred."}), 500
+        return jsonify(e), 500
 
 
 def login():
