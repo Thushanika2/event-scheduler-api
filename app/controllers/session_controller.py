@@ -6,18 +6,6 @@ from app.models.session_model import Session
 def create_session():
     data = request.get_json(silent=True)
 
-    new_start = data["start_time"]
-    new_end = data["end_time"]
-
-    clash = session.query.filter(
-        session.user_id == data["user_id"],
-        session.start_time < new_end,
-        session.end_time > new_start
-    ).first()
-
-    if clash:
-        return {"message": "Time clash detected"}, 400
-
     if not data:
         return jsonify ({"error":"request body is required"}), 400
     
