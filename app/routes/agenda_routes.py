@@ -1,27 +1,27 @@
 from flask import Blueprint
-from flask_jwt_extended import jwt_required
-from app.controllers import agenda_controller as ctrl
 
-agenda_bp = Blueprint("agendas", __name__, url_prefix="/api/agendas")
+from app.controllers import agenda_controller as ctrl
+from app.middleware import jwt_required_user, roles_required
+
+agenda_bp = Blueprint("agenda", __name__, url_prefix="/api/agenda")
+
 
 @agenda_bp.route("", methods=["POST"])
-@jwt_required()
-def create_agenda():
-    return ctrl.create_agenda()
+@jwt_required_user
+@roles_required("attendee")
+def create_agenda_item():
+    return ctrl.create_agenda_item()
 
-@agenda_bp.route("", methods=["GET"])
-@jwt_required()
-def get_agendas():
-    return ctrl.get_agendas()
 
-@agenda_bp.route("/<int:agenda_id>", methods=["GET"])
-def get_agenda(agenda_id):
-    return ctrl.get_agenda(agenda_id)
+@agenda_bp.route("/my", methods=["GET"])
+@jwt_required_user
+@roles_required("attendee")
+def get_my_agenda():
+    return ctrl.get_my_agenda()
 
-@agenda_bp.route("/<int:agenda_id>", methods=["PUT"])
-def update_agenda(agenda_id):
-    return ctrl.update_agenda(agenda_id)
 
-@agenda_bp.route("/<int:agenda_id>", methods=["DELETE"])
-def delete_agenda(agenda_id):
-    return ctrl.delete_agenda(agenda_id)
+@agenda_bp.route("/<int:agenda_item_id>", methods=["DELETE"])
+@jwt_required_user
+@roles_required("attendee")
+def delete_agenda_item(agenda_item_id):
+    return ctrl.delete_agenda_item(agenda_item_id)

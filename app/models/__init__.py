@@ -1,8 +1,7 @@
 from app.models.user_model import User
-from app.models.room_model import Room
+from app.models.organiser_model import Organiser
+from app.models.attendee_model import Attendee
 from app.models.session_model import Session
-from app.models.agenda_model import Agenda
+from app.models.agenda_model import AgendaItem
 
-
-__all__ = ["User", "Room", "Agenda", "Session"]
-
+__all__ = ["User", "Organiser", "Attendee", "Session", "AgendaItem"]

@@ -1,9 +1,13 @@
 import re
+
 from flask import jsonify, request
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, current_user
 
 from app.extensions import db
+from app.models.attendee_model import Attendee
+from app.models.organiser_model import Organiser
 from app.models.user_model import User
+from app.utils import PUBLIC_REGISTER_ROLES
 
 
 def _validate_register_payload(data):
@@ -28,10 +32,15 @@ def _validate_register_payload(data):
     elif len(str(password)) < 6:
         errors.append("password must be at least 6 characters long.")
 
-    role = data.get("role", "user")
-    if role is not None and str(role).strip() != "":
-        if str(role).strip().lower() not in ("user", "admin"):
-            errors.append("role must be 'user' or 'admin'.")
+    role = str(data.get("role", "attendee")).strip().lower() or "attendee"
+    if role == "admin":
+        errors.append("Admin accounts can only be created via database seeders.")
+    elif role not in PUBLIC_REGISTER_ROLES:
+        errors.append("role must be 'attendee' or 'organiser'.")
+
+    full_name = data.get("full_name")
+    if full_name is None or str(full_name).strip() == "":
+        errors.append("full_name is required.")
 
     return errors
 
@@ -62,17 +71,46 @@ def register():
         return jsonify({"errors": errors}), 400
 
     try:
-        role = str(data.get("role", "user")).strip().lower() or "user"
+        role = str(data.get("role", "attendee")).strip().lower() or "attendee"
+        if role not in PUBLIC_REGISTER_ROLES:
+            return jsonify({"error": "Invalid role for registration."}), 400
+
         user = User(
             email=str(data.get("email")).strip(),
             role=role,
+            is_active=False,
         )
         user.set_password(str(data.get("password")))
-
-
         db.session.add(user)
+        db.session.flush()
+
+        full_name = str(data.get("full_name")).strip()
+        phone = str(data.get("phone")).strip() if data.get("phone") else None
+
+        if role == "organiser":
+            profile = Organiser(
+                user_id=user.id,
+                full_name=full_name,
+                organisation=str(data.get("organisation")).strip() if data.get("organisation") else None,
+                phone=phone,
+            )
+            db.session.add(profile)
+        else:
+            profile = Attendee(
+                user_id=user.id,
+                full_name=full_name,
+                phone=phone,
+            )
+            db.session.add(profile)
+
         db.session.commit()
-        return jsonify({"message": "User registered successfully.", "user": user.to_dict()}), 201
+
+        profile_key = "organiser" if role == "organiser" else "attendee"
+        return jsonify({
+            "message": "User registered successfully. Awaiting admin approval.",
+            "user": user.to_dict(),
+            profile_key: profile.to_dict(),
+        }), 201
     except Exception:
         db.session.rollback()
         return jsonify({"error": "An internal server error occurred."}), 500
@@ -94,11 +132,33 @@ def login():
         if not user or not user.check_password(str(data.get("password"))):
             return jsonify({"error": "Invalid email or password."}), 401
 
-        access_token = create_access_token(identity=str(user.user_id))
+        if not user.is_active:
+            return jsonify({"error": "Account is pending admin approval."}), 403
+
+        access_token = create_access_token(identity=str(user.id))
         return jsonify({
             "message": "Login successful.",
             "access_token": access_token,
-            "user": user.to_dict()
+            "user": user.to_dict(),
         }), 200
     except Exception:
+        db.session.rollback()
         return jsonify({"error": "An internal server error occurred."}), 500
+
+
+def logout():
+    return jsonify({"message": "Logout successful."}), 200
+
+
+def profile():
+    user = current_user
+    if not user:
+        return jsonify({"error": "User not found."}), 404
+
+    payload = {"user": user.to_dict()}
+    if user.role == "organiser" and user.organiser:
+        payload["organiser"] = user.organiser.to_dict()
+    if user.role == "attendee" and user.attendee:
+        payload["attendee"] = user.attendee.to_dict()
+
+    return jsonify(payload), 200

@@ -1,29 +1,31 @@
 from app.extensions import db
-from app.utils import utc_now
+
 
 class Session(db.Model):
-    __tablename__="sessions"
-    session_id = db.Column( db.Integer, primary_key=True, autoincrement=True )
-    room_id = db.Column(db.Integer, db.ForeignKey('rooms.room_id'))
-    title = db.Column( db.String(255), nullable=False )
-    speaker = db.Column( db.String(255), nullable=False )
-    date = db.Column( db.Date, nullable=False )
-    start_time = db.Column( db.Time, nullable=False )
-    end_time = db.Column( db.Time, nullable=False )
-    capacity = db.Column( db.Integer, nullable=False )
+    __tablename__ = "sessions"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    organiser_id = db.Column(db.Integer, db.ForeignKey("organisers.id"), nullable=False)
+    title = db.Column(db.String(255), nullable=False)
+    speaker = db.Column(db.String(255), nullable=False)
+    track = db.Column(db.String(255), nullable=False)
+    room = db.Column(db.String(255), nullable=False)
+    start_time = db.Column(db.DateTime, nullable=False)
+    end_time = db.Column(db.DateTime, nullable=False)
+    capacity = db.Column(db.Integer, nullable=False)
+
+    organiser = db.relationship("Organiser", back_populates="sessions")
+    agenda_items = db.relationship("AgendaItem", back_populates="session")
 
     def to_dict(self):
         return {
-            "session_id": self.session_id,
-            "room_id": self.room_id,
+            "id": self.id,
+            "organiser_id": self.organiser_id,
             "title": self.title,
             "speaker": self.speaker,
-            "date": self.date,
-            "start_time": self.start_time,
-            "end_time": self.end_time,
+            "track": self.track,
+            "room": self.room,
+            "start_time": self.start_time.isoformat() if self.start_time else None,
+            "end_time": self.end_time.isoformat() if self.end_time else None,
             "capacity": self.capacity,
         }
-
-
-
-
