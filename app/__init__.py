@@ -6,6 +6,8 @@ from sqlalchemy.exc import OperationalError, ProgrammingError
 
 
 def create_app():
+    Config.validate()
+
     app = Flask(__name__)
     app.config.from_object(Config)
     db.init_app(app)
