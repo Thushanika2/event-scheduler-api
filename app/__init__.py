@@ -11,30 +11,27 @@ def create_app():
     db.init_app(app)
     jwt.init_app(app)
 
-    from app.models import User , Room , Agenda , Session 
+    from app.models import User, Organiser, Attendee, Session, AgendaItem
 
     @jwt.user_lookup_loader
     def user_lookup_callback(_jwt_header, jwt_data):
         identity = jwt_data["sub"]
         return db.session.get(User, int(identity))
 
-
-
     register_blueprints(app)
-    
+
     @app.route("/", methods=["GET"])
     def api_home():
         return jsonify({
-            "message": "Event Management API",
+            "message": "Event Scheduler API",
             "version": "1.0",
             "endpoints": {
+                "auth": "/api/auth",
                 "sessions": "/api/sessions",
-                "agendas": "/api/agendas",
-                "auth": {
-                    "register": "/api/auth/register",
-                    "login": "/api/auth/login"
-                }
-            }
+                "agenda": "/api/agenda",
+                "attendees": "/api/attendees",
+                "organisers": "/api/organisers",
+            },
         })
 
     @app.errorhandler(OperationalError)
